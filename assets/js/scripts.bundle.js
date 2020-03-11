@@ -333,13 +333,6 @@ var KTApp = function() {
 
         getBaseColor: function(type, level) {
             return colors["base"][type][level - 1];
-        },
-
-        getSiteUrl: function(url = '') {
-            var p = window.location.protocol;
-            var h = window.location.hostname;
-            var site = p + '//' + h + '/mis/' + url;
-            return site;
         }
     };
 }();

@@ -9,6 +9,35 @@ class User extends CI_Controller {
         $this->load->model('System_Model', 'System');
     }
 
+    public function login2() {
+        $usuario = 'rodrigo.quintana';
+        $senha = 'Elo@2019';
+        $domain = "GRUPOELO.INT";
+        $usuario .= "@{$domain}";
+        $base_dn = 'DC=GRUPOELO,DC=INT';
+        $filter = "(&(objectClass=user)(displayname=Rodrigo Quintana))";
+        $connect = ldap_connect($domain);
+        if ($connect) :
+            // We have to set this option for the version of Active Directory we are using.
+            ldap_set_option($connect, LDAP_OPT_PROTOCOL_VERSION, 3) or die('Unable to set LDAP protocol version');
+            ldap_set_option($connect, LDAP_OPT_REFERRALS, 0); // We need this for doing an LDAP search.
+            
+            @$bind = ldap_bind($connect, $usuario, $senha);
+            if ($bind) :
+                ldap_control_paged_result($connect, 50);
+                $search = ldap_search($connect, $base_dn, $filter, ['userprincipalname', 'displayname', 'samaccountname', 'cn', 'memberof']);
+                $infos = ldap_get_entries($connect, $search);
+                var_dump($infos);
+                exit;
+                ldap_close($connect);
+                return $infos;
+            else:
+                ldap_close($connect);
+                return false;
+            endif;
+        endif;
+    }
+
     public function login() {
         if ($this->session->userdata('USU_LOGADO')) :
             $this->session->set_flashdata(['type' => 'info', 'msg' => '<strong>Oops!</strong> Você já está logado no sistema.']);

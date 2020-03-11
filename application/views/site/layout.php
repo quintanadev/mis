@@ -13,13 +13,16 @@
         <!-- App css -->
         <link href="<?= base_url('assets/css/ubold/bootstrap-' . $this->session->userdata('CONFIG_G')['site_skin'] . '.min.css'); ?>" rel="stylesheet" type="text/css" />
         <link href="<?= base_url('assets/css/ubold/icons-' . $this->session->userdata('CONFIG_G')['site_skin'] . '.min.css'); ?>" rel="stylesheet" type="text/css" />
-        <link href="<?= base_url('assets/css/ubold/app-' . $this->session->userdata('CONFIG_G')['site_skin'] . '.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/css/ubold/app-' . $this->session->userdata('CONFIG_G')['site_skin'] . '.css'); ?>" rel="stylesheet" type="text/css" />
 
         <!--begin::Global Theme Styles(used by all pages) -->
 		<link href="<?= base_url('assets/css/plugins.bundle.css'); ?>" rel="stylesheet" type="text/css" />
         <!--end::Global Theme Styles -->
 
         <!-- Plugins css -->
+        <link href="<?= base_url('assets/plugins/flatpickr/flatpickr.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/datatables/DataTables-1.10.12/css/dataTables.bootstrap4.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/datatables/Responsive-2.2.3/css/responsive.bootstrap4.css'); ?>" rel="stylesheet" type="text/css" />
         
     </head>
 
@@ -34,6 +37,7 @@
 
                     <?php // $this->load->view('partials/search'); ?>
                     <?php // $this->load->view('partials/notification'); ?>
+                    <?php $this->load->view('partials/filters'); ?>
                     <?php $this->load->view('partials/user'); ?>
                     <?php $this->load->view('partials/setting'); ?>
                 </ul>
@@ -74,7 +78,7 @@
                     <div class="container-fluid">
                         
                         <?php // $this->load->view('partials/page-title'); ?>
-                        
+                        <div class="mb-3"></div>
                         <div class="row">
                             <div class="col-md-12 col-xl-12">
                                 <?php for ($i = 0; $i < count($views); $i++) :
@@ -132,14 +136,14 @@
         <!-- end::Global Config -->
         
         <!-- Vendor js -->
+        <script src="<?= base_url('assets/plugins/jquery.min.js'); ?>" type="text/javascript"></script>
         <script src="<?= base_url('assets/js/vendor.min.js'); ?>"></script>
 
         <!-- App js-->
         <script src="<?= base_url('assets/js/app.min.js'); ?>"></script>
-
-        <!-- Plugins js-->
-        <script src="<?= base_url('assets/plugins/plugins.bundle.js'); ?>" type="text/javascript"></script>
-        <script src="<?= base_url('assets/js/scripts.bundle.js'); ?>" type="text/javascript"></script>
+        <script src="<?= base_url('assets/js/site/app-custom.js'); ?>"></script>
         
+        <!-- Pages Site js-->
+        <?php $this->load->view('partials/scripts'); ?>
     </body>
 </html>

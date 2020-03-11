@@ -112,7 +112,7 @@ class System_Model extends MY_Model {
                         ->select('OPER.Alias AS operacao')
                         ->join('admin_operacoes' . ' AS OPER', 'OPER.IDOperacao=PUO.IDOperacao')
                         ->where('PUO.IDUsuario', $usuario)
-                        ->get('permissao_usuarios_operacoes' . ' AS PUO');
+                        ->get('admin_per_usuarios_operacoes' . ' AS PUO');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
@@ -142,8 +142,30 @@ class System_Model extends MY_Model {
         }
 
         /**
+         * Define dados do USUARIO
+         */
+        $usuario = $this->getUsuario($this->session->userdata('USU_ID'));
+
+        /**
+         * Define Configurações do USUÁRIO
+         */
+        $queryUser = $this->db->where('IDUsuario', $this->session->userdata('USU_ID'))
+                            ->get('admin_configuracoes_usuarios')
+                            ->result_array();
+        $configUser = [];
+        foreach ($queryUser as $key => $value) :
+            $configUser[$value['ConfigAlias']] = $value['ConfigValor'];
+        endforeach;
+
+        /**
          * Define MENU da aplicação
          */
+        if (!$usuario['Funcionario']) {
+            $this->db->where(['AcessoCliente' => 1]);
+        }
+        if (!$usuario['Admin']) {
+            $this->db->where(['AcessoAdmin' => 0]);
+        }
         $menuP = $this->db->where(['MenuAPP' => 'portal', 'Ativo' => 1])
                             ->order_by('MenuTipo ASC,Ordem ASC')
                             ->get('admin_menus')
@@ -172,20 +194,13 @@ class System_Model extends MY_Model {
         endif;
 
         /**
-         * Define Configurações do USUÁRIO
+         * Define SCRIPTS a serem carregados
          */
-        $queryUser = $this->db->where('IDUsuario', $this->session->userdata('USU_ID'))
-                            ->get('admin_configuracoes_usuarios')
-                            ->result_array();
-        $configUser = [];
-        foreach ($queryUser as $key => $value) :
-            $configUser[$value['ConfigAlias']] = $value['ConfigValor'];
-        endforeach;
-
-        /**
-         * Define dados do USUARIO
-         */
-        $usuario = $this->getUsuario($this->session->userdata('USU_ID'));
+        $scripts = $this->db->select('SCR.Script')
+                ->where(['AMS.IDMenu' => $menuAtual['IDMenu']])
+                ->join('admin_scripts AS SCR', 'SCR.IDScript=AMS.IDScript')
+                ->get('admin_menus_scripts AS AMS')
+                ->result_array();
 
         /**
          * Define dados de ESTRUTURA
@@ -215,6 +230,7 @@ class System_Model extends MY_Model {
             'CONFIG_U' => $configUser,
             'MENU_PORTAL' => $menuPortal,
             'MENU_ATUAL' => $menuAtual,
+            'MENU_SCRIPTS' => $scripts,
             'ESTRUTURA' => $estrutura,
             'USUARIO' => $usuario,
             'USU_NOME' => explode(' ', $usuario['NomeUsuario'])[0],

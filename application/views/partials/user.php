@@ -2,7 +2,7 @@
     <a class="nav-link dropdown-toggle nav-user mr-0 waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
         <img src="<?= base_url($this->session->userdata('CONFIG_G')['user_dir_avatar'] . $this->session->userdata('CONFIG_G')['user_avatar']); ?>" alt="user-image" class="rounded-circle">
         <span class="pro-user-name ml-1">
-            Geneva <i class="mdi mdi-chevron-down"></i> 
+            <?= $this->session->userdata('USU_NOME') . ' ' . $this->session->userdata('USU_SOBRENOME'); ?> <i class="mdi mdi-chevron-down"></i>
         </span>
     </a>
     <div class="dropdown-menu dropdown-menu-right profile-dropdown ">

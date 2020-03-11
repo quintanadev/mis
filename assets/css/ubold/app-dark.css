@@ -86,7 +86,7 @@ body {
 
 .left-side-menu {
   width: 240px;
-  background: #ffffff;
+  background: #2D343D;
   bottom: 0;
   padding: 20px 0;
   position: fixed;
@@ -402,7 +402,7 @@ body.enlarged {
   height: 70px;
   width: 240px;
   float: left;
-  background-color: #ffffff; }
+  background-color: #36404A; }
 
 .navbar-custom {
   background-color: #36404a;
