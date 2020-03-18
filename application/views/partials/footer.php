@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-6">
-                <?= $this->session->userdata('CONFIG_G')['site_footer']; ?>
+                <?= $this->session->userdata('CONFIG_G')['site-footer']; ?>
             </div>
             <div class="col-md-6">
                 <div class="text-md-right footer-links d-none d-sm-block">

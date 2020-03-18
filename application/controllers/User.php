@@ -15,7 +15,7 @@ class User extends CI_Controller {
         $domain = "GRUPOELO.INT";
         $usuario .= "@{$domain}";
         $base_dn = 'DC=GRUPOELO,DC=INT';
-        $filter = "(&(objectClass=user)(displayname=Rodrigo Quintana))";
+        $filter = "(&(objectClass=user)(samaccountname=max.soares.adm))";
         $connect = ldap_connect($domain);
         if ($connect) :
             // We have to set this option for the version of Active Directory we are using.
@@ -161,6 +161,12 @@ class User extends CI_Controller {
         else:
             redirect(base_url(), 'refresh');
         endif;
+    }
+
+    public function set_skin() {
+        $post = $this->input->post();
+        $retorno = $this->System->update_settings_user($post);
+        echo json_encode($retorno);
     }
 
 }

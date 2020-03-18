@@ -157,7 +157,8 @@
 		<!--begin::Global Theme Bundle(used by all pages) -->
 		<script src="<?= base_url('assets/plugins/plugins.bundle.js'); ?>" type="text/javascript"></script>
 		<script src="<?= base_url('assets/js/scripts.bundle.js'); ?>" type="text/javascript"></script>
-
+		<script src="<?= base_url('assets/js/site/app-custom.js'); ?>"></script>
+		
 		<!--end::Global Theme Bundle -->
 
 		<!--begin::Page Scripts(used by this page) -->

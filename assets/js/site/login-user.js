@@ -103,11 +103,11 @@ var LoginUser = function() {
 
             form.ajaxSubmit({
                 data: form.serialize(),
-                url: KTApp.getSiteUrl('user/login'),
+                url: MetApp.getSiteUrl('user/login'),
                 success: function(response, status, xhr, $form) {
                     var res = JSON.parse(response);
                     if (res.type === 'success') {
-                        $(location).attr('href', KTApp.getSiteUrl())
+                        $(location).attr('href', MetApp.getSiteUrl())
                     } else {
                         setTimeout(function() {
                             btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
@@ -185,7 +185,7 @@ var LoginUser = function() {
 
             form.ajaxSubmit({
                 data: form.serialize(),
-                url: KTApp.getSiteUrl('user/register'),
+                url: MetApp.getSiteUrl('user/register'),
                 success: function(response, status, xhr, $form) {
                     console.log(response);
                 	var res = JSON.parse(response);

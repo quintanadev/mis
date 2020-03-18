@@ -11,9 +11,10 @@
         <link rel="shortcut icon" href="<?= base_url('assets/media/logos/favicon.ico'); ?>">
 
         <!-- App css -->
-        <link href="<?= base_url('assets/css/ubold/bootstrap-' . $this->session->userdata('CONFIG_G')['site_skin'] . '.min.css'); ?>" rel="stylesheet" type="text/css" />
-        <link href="<?= base_url('assets/css/ubold/icons-' . $this->session->userdata('CONFIG_G')['site_skin'] . '.min.css'); ?>" rel="stylesheet" type="text/css" />
-        <link href="<?= base_url('assets/css/ubold/app-' . $this->session->userdata('CONFIG_G')['site_skin'] . '.css'); ?>" rel="stylesheet" type="text/css" />
+        <?php $skin = (isset($this->session->userdata('CONFIG_U')['site-skin']) ? $this->session->userdata('CONFIG_U')['site-skin'] : $this->session->userdata('CONFIG_G')['site-skin']); ?>
+        <link href="<?= base_url('assets/css/ubold/bootstrap-' . $skin . '.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/css/ubold/icons-' . $skin . '.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/css/ubold/app-' . $skin . '.css'); ?>" rel="stylesheet" type="text/css" />
 
         <!--begin::Global Theme Styles(used by all pages) -->
 		<link href="<?= base_url('assets/css/plugins.bundle.css'); ?>" rel="stylesheet" type="text/css" />
@@ -37,6 +38,7 @@
 
                     <?php // $this->load->view('partials/search'); ?>
                     <?php // $this->load->view('partials/notification'); ?>
+                    <?php $this->load->view('partials/actions'); ?>
                     <?php $this->load->view('partials/filters'); ?>
                     <?php $this->load->view('partials/user'); ?>
                     <?php $this->load->view('partials/setting'); ?>
@@ -111,37 +113,6 @@
 
         <!-- Right bar overlay-->
         <div class="rightbar-overlay"></div>
-
-        <!-- begin::Global Config(global config for global JS sciprts) -->
-		<script>
-			var KTAppOptions = {
-				"colors": {
-					"state": {
-						"brand": "#2c77f4",
-						"light": "#ffffff",
-						"dark": "#282a3c",
-						"primary": "#5867dd",
-						"success": "#34bfa3",
-						"info": "#36a3f7",
-						"warning": "#ffb822",
-						"danger": "#fd3995"
-					},
-					"base": {
-						"label": ["#c5cbe3", "#a1a8c3", "#3d4465", "#3e4466"],
-						"shape": ["#f0f3ff", "#d9dffa", "#afb4d4", "#646c9a"]
-					}
-				}
-			};
-		</script>
-        <!-- end::Global Config -->
-        
-        <!-- Vendor js -->
-        <script src="<?= base_url('assets/plugins/jquery.min.js'); ?>" type="text/javascript"></script>
-        <script src="<?= base_url('assets/js/vendor.min.js'); ?>"></script>
-
-        <!-- App js-->
-        <script src="<?= base_url('assets/js/app.min.js'); ?>"></script>
-        <script src="<?= base_url('assets/js/site/app-custom.js'); ?>"></script>
         
         <!-- Pages Site js-->
         <?php $this->load->view('partials/scripts'); ?>

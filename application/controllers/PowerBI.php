@@ -16,10 +16,21 @@ class PowerBI extends MY_Controller {
 
 		$this->load->view('site/layout', $data);
 	}
-	
+
+	public function dashboard($id = null) {
+		if (!$id) redirect(site_url('powerbi'));
+
+		$data['page_title'] = 'Power BI';
+        $data['page_subtitle'] = 'Dashboards';
+		$data['views'] = ['pages/powerbi/dashboard'];
+		$data['pbi'] = $this->PowerBI->get_dashboard($id);
+
+		$this->load->view('site/layout', $data);
+	}
+   	
 	public function get_dashboard_list() {
 		$data = $this->PowerBI->get_dashboard_list();
 		return $data;
 	}
-   
+
 }

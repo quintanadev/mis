@@ -1,13 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ticket_Model extends MY_Model {
+class Incident_Model extends MY_Model {
 
     public function __construct() {
         parent::__construct();
     }
 
-    public function get_ticket($data) {
+    public function get_incident($data) {
         if (!$this->session->userdata("USUARIO")['ModTicket']) :
             $this->db->where("TKT.IDUsuarioCadastro", $this->session->userdata("USU_ID"));
         endif;
@@ -19,10 +19,11 @@ class Ticket_Model extends MY_Model {
                     ->or_where("'#'+CONVERT(VARCHAR(12),TKT.IDTicket)", $data['search']['value'])
                     ->group_end();
         endif;
-        $query = $this->db->select('TKT.IDTicket,TSOL.TipoSolicitacao,TKT.DataCadastro,USU.NomeUsuario AS UsuarioCadastro,STS.Status')
+        $query = $this->db->select('TKT.IDTicket,TSOL.TipoSolicitacao,TKT.DataCadastro,USU.NomeUsuario AS UsuarioCadastro,STS.Status,OPE.Operacao,OPE.Imagem')
                         ->join('admin_usuarios AS USU', 'USU.IDUsuario=TKT.IDUsuarioCadastro')
                         ->join('ticket_tipo_solicitacoes AS TSOL', 'TSOL.IDTipoSolicitacao=TKT.IDTipoSolicitacao')
                         ->join('ticket_status AS STS', 'STS.IDStatus=TKT.IDStatus')
+                        ->join('admin_operacoes AS OPE', 'OPE.IDOperacao=TKT.IDOperacao')
                         ->order_by($data['columns'][$data['order'][0]['column']]['name'], $data['order'][0]['dir'])
                         ->get('ticket_chamados AS TKT');
         if ($query->num_rows() > 0) :
@@ -31,7 +32,7 @@ class Ticket_Model extends MY_Model {
         return FALSE;
     }
     
-    public function get_ticket_detail($data) {
+    public function get_incident_detail($data) {
         $query = $this->db->select('TKT.IDTicket,CONVERT(VARCHAR(10),TKT.DataCadastro,103) AS DataCadastro,
             CONVERT(VARCHAR(8),TKT.DataCadastro,108) AS HoraCadastro,TKT.Assunto,TKT.Descricao,
             USU.NomeUsuario AS UsuarioCadastro,USU.Email AS UsuarioEmail,OPER.Operacao AS Operacao,TSOL.TipoSolicitacao,
@@ -49,7 +50,7 @@ class Ticket_Model extends MY_Model {
         return ['msg' => 'Nenhum registro encontrado!', 'type' => 'danger'];
     }
 
-    public function putTicket($data) {
+    public function post_ticket($data) {
         $data['IDUsuarioCadastro'] = $this->session->userdata('USU_ID');
         $this->db->insert('ticket_chamados', $data);
         if ($this->db->affected_rows() > 0) :
@@ -60,7 +61,7 @@ class Ticket_Model extends MY_Model {
         return ['type' => 'danger', 'msg' => 'Oops! Erro ao criar novo chamado.<br>Favor tente novamente mais tarde ou contate o administrador do sistema.'];
     }
 
-    public function updateTratativa($data) {
+    public function update_ticket($data) {
         $usuario = $this->session->userdata('USU_ID');
         $update = [
             'IDStatus' => $data['IDStatus'],
@@ -92,7 +93,7 @@ class Ticket_Model extends MY_Model {
         return ['type' => 'danger', 'msg' => 'Oops! Erro ao responder chamado.<br>Favor tente novamente mais tarde ou contate o administrador do sistema.'];
     }
 
-    public function getTipoSolicitacao() {
+    public function get_type_solicitation() {
         $query = $this->db->where('Ativo', 1)
                         ->get('ticket_tipo_solicitacoes');
         if ($query->num_rows() > 0) :
@@ -101,7 +102,7 @@ class Ticket_Model extends MY_Model {
         return FALSE;
     }
 
-    public function getSolicitacao($data = NULL) {
+    public function get_solicitation($data = NULL) {
         if ($data) :
             $this->db->where('IDTipoSolicitacao', $data['IDTipoSolicitacao']);
         endif;
@@ -113,7 +114,7 @@ class Ticket_Model extends MY_Model {
         return FALSE;
     }
 
-    public function getOperacao() {
+    public function get_operation() {
         $query = $this->db->where('Ativo', 1)
                         ->where('Filtro', 1)
                         ->order_by('Operacao')
@@ -124,7 +125,7 @@ class Ticket_Model extends MY_Model {
         return FALSE;
     }
 
-    public function getTicketComentario($data) {
+    public function get_ticket_comment($data) {
         $query = $this->db->select('COMENT.IDTicket,CONVERT(VARCHAR(10),COMENT.DataCadastro,103) AS DataComentario,
             CONVERT(VARCHAR(8),COMENT.DataCadastro,108) AS HoraComentario,USU.NomeUsuario AS UsuarioComentario,
             USU.Avatar AS UsuarioAvatar,STS.Status,COMENT.Comentario')
@@ -137,14 +138,6 @@ class Ticket_Model extends MY_Model {
             return $query->result_array();
         endif;
         return ['msg' => 'Nenhum comentário encontrado!', 'type' => 'info'];
-    }
-
-    public function getCountTicket($data) {
-        if ($data['dias']) :
-            $this->db->where('DataCadastro>=', date('Y-m-d', strtotime("{$data['dias']} days")));
-        endif;
-        $query = $this->db->count_all('ticket_chamados');
-        return $query;
     }
 
 }

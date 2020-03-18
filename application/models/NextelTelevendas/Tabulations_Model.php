@@ -15,8 +15,8 @@ class Tabulations_Model extends MY_Model {
                 PVT.[16],PVT.[17],PVT.[18],PVT.[19],PVT.[20],PVT.[21],PVT.[22],PVT.[23]
             FROM (
                 SELECT TAB.MatriculaElo,EST.NomeColaborador,DATEPART(HOUR,DataHoraTabulacao) AS Intervalo,SUM(STT.QtdVenda) AS QtdVenda
-                FROM " . $this->DB_TABLES['nextel_tab'] . " AS TAB
-                INNER JOIN " . $this->DB_TABLES['nextel_stt'] . " AS STT ON STT.IDStatus=TAB.IDStatus
+                FROM " . $this->DB_TABLES['nextel-tab'] . " AS TAB
+                INNER JOIN " . $this->DB_TABLES['nextel-stt'] . " AS STT ON STT.IDStatus=TAB.IDStatus
                 LEFT JOIN " . $this->DB_TABLES['estrutura-atual'] . " AS EST ON EST.MatriculaElo=TAB.MatriculaElo
                 WHERE DataReferencia >= '" . FormatarDataSQL($data['filters']['DataReferenciaDe']) . "'
                 AND DataReferencia <= '" . FormatarDataSQL($data['filters']['DataReferenciaAte']) . "'
@@ -28,8 +28,8 @@ class Tabulations_Model extends MY_Model {
             ) AS PVT
             INNER JOIN (
                 SELECT TAB.MatriculaElo,SUM(QtdVenda) AS QtdVenda
-                FROM " . $this->DB_TABLES['nextel_tab'] . " AS TAB
-                INNER JOIN " . $this->DB_TABLES['nextel_stt'] . " AS STT ON STT.IDStatus=TAB.IDStatus
+                FROM " . $this->DB_TABLES['nextel-tab'] . " AS TAB
+                INNER JOIN " . $this->DB_TABLES['nextel-stt'] . " AS STT ON STT.IDStatus=TAB.IDStatus
                 LEFT JOIN " . $this->DB_TABLES['estrutura-atual'] . " AS EST ON EST.MatriculaElo=TAB.MatriculaElo
                 WHERE DataReferencia >= '" . FormatarDataSQL($data['filters']['DataReferenciaDe']) . "'
                 AND DataReferencia <= '" . FormatarDataSQL($data['filters']['DataReferenciaAte']) . "'
@@ -49,8 +49,8 @@ class Tabulations_Model extends MY_Model {
         $this->db->group_by('TAB.DataReferencia');
         $this->db->order_by('TAB.DataReferencia', 'ASC');
         $query = $this->db->select('CONVERT(VARCHAR(10),TAB.DataReferencia,103) AS DataReferencia, SUM(STT.QtdVenda) AS QtdVenda, COUNT(*) AS QtdTabulacao')
-                        ->join($this->DB_TABLES['nextel_stt'] . ' AS STT', 'STT.IDStatus=TAB.IDStatus')
-                        ->get($this->DB_TABLES['nextel_tab'] . ' AS TAB');
+                        ->join($this->DB_TABLES['nextel-stt'] . ' AS STT', 'STT.IDStatus=TAB.IDStatus')
+                        ->get($this->DB_TABLES['nextel-tab'] . ' AS TAB');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
@@ -63,9 +63,9 @@ class Tabulations_Model extends MY_Model {
         $this->db->group_by('DATEPART(HOUR,TAB.DataHoraTabulacao)');
         $this->db->order_by('1', 'ASC');
         $query = $this->db->select('DATEPART(HOUR,TAB.DataHoraTabulacao) AS Intervalo, SUM(STT.QtdVenda) AS QtdVenda, SUM(CON.QtdInsucesso) AS QtdInsucesso, COUNT(*) AS QtdTabulacao')
-                        ->join($this->DB_TABLES['nextel_stt'] . ' AS STT', 'STT.IDStatus=TAB.IDStatus')
-                        ->join($this->DB_TABLES['nextel_cond'] . ' AS CON', 'CON.Condicao=TAB.Condicao', 'LEFT')
-                        ->get($this->DB_TABLES['nextel_tab'] . ' AS TAB');
+                        ->join($this->DB_TABLES['nextel-stt'] . ' AS STT', 'STT.IDStatus=TAB.IDStatus')
+                        ->join($this->DB_TABLES['nextel-cond'] . ' AS CON', 'CON.Condicao=TAB.Condicao', 'LEFT')
+                        ->get($this->DB_TABLES['nextel-tab'] . ' AS TAB');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
@@ -82,11 +82,11 @@ class Tabulations_Model extends MY_Model {
                 CASE WHEN TAB.Debito=1 THEN 'SIM' WHEN TAB.Debito=0 THEN 'NAO' ELSE '' END AS Debito,
                 CASE WHEN TAB.Portabilidade=1 THEN 'SIM' WHEN TAB.Portabilidade=0 THEN 'NAO' ELSE '' END AS Portabilidade,
                 STT.Status,TAB.Condicao,PLA.PlanoVendido")
-                        ->join($this->DB_TABLES['nextel_stt'] . ' AS STT', 'STT.IDStatus=TAB.IDStatus', 'LEFT')
-                        ->join($this->DB_TABLES['nextel_cam'] . ' AS CAM', 'CAM.IDCampanha=TAB.IDStatus', 'LEFT')
-                        ->join($this->DB_TABLES['nextel_pla'] . ' AS PLA', 'PLA.IDPlanoVendido=TAB.IDPlanoVendido', 'LEFT')
-                        ->join($this->DB_TABLES['estrutura_atual'] . ' AS EST', 'EST.MatriculaElo=TAB.MatriculaElo', 'LEFT')
-                        ->get($this->DB_TABLES['nextel_tab'] . ' AS TAB');
+                        ->join($this->DB_TABLES['nextel-stt'] . ' AS STT', 'STT.IDStatus=TAB.IDStatus', 'LEFT')
+                        ->join($this->DB_TABLES['nextel-cam'] . ' AS CAM', 'CAM.IDCampanha=TAB.IDStatus', 'LEFT')
+                        ->join($this->DB_TABLES['nextel-pla'] . ' AS PLA', 'PLA.IDPlanoVendido=TAB.IDPlanoVendido', 'LEFT')
+                        ->join($this->DB_TABLES['estrutura-atual'] . ' AS EST', 'EST.MatriculaElo=TAB.MatriculaElo', 'LEFT')
+                        ->get($this->DB_TABLES['nextel-tab'] . ' AS TAB');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;

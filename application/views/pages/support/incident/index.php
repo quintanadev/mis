@@ -76,7 +76,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card-box">
-            <a href="<?= base_url('ticket/created'); ?>" class="btn btn-sm btn-blue waves-effect waves-light float-right">
+            <a href="<?= base_url('support/incident/created'); ?>" class="btn btn-sm btn-blue waves-effect waves-light float-right">
                 <i class="mdi mdi-plus-circle"></i> Abrir Novo Ticket
             </a>
             <h4 class="header-title mb-4">Lista de Chamados</h4>

@@ -16,12 +16,12 @@ class Tabulations_Model extends MY_Model {
             FROM (
                 SELECT RES.Finalizador,DATEPART(HOUR,RES.DataHoraResultado) AS Intervalo,
                     ROUND(CONVERT(FLOAT,COUNT(*))" . ($data['filters']['Visao'] === 'percentual' ? "
-                    /(SELECT COUNT(*) FROM " . $this->DB_TABLES['ceabs_result'] . " AS ITV 
+                    /(SELECT COUNT(*) FROM " . $this->DB_TABLES['ceabs-result'] . " AS ITV 
                     WHERE ITV.DataReferencia >= '" . FormatarDataSQL($data['filters']['DataReferenciaDe']) . "'
                     AND ITV.DataReferencia <= '" . FormatarDataSQL($data['filters']['DataReferenciaAte']) . "'
                     AND DATEPART(HOUR,ITV.DataHoraResultado)=DATEPART(HOUR,RES.DataHoraResultado)
                     )*100" : "") . ",2) AS QtdTabulacao
-                FROM " . $this->DB_TABLES['ceabs_result'] . " AS RES
+                FROM " . $this->DB_TABLES['ceabs-result'] . " AS RES
                 WHERE RES.DataReferencia >= '" . FormatarDataSQL($data['filters']['DataReferenciaDe']) . "'
                 AND RES.DataReferencia <= '" . FormatarDataSQL($data['filters']['DataReferenciaAte']) . "'
                 GROUP BY Finalizador,DATEPART(HOUR,DataHoraResultado)
@@ -32,11 +32,11 @@ class Tabulations_Model extends MY_Model {
             ) AS PVT
             INNER JOIN (
                 SELECT Finalizador,ROUND(CONVERT(FLOAT,COUNT(*))" . ($data['filters']['Visao'] === 'percentual' ? "
-                    /(SELECT COUNT(*) FROM " . $this->DB_TABLES['ceabs_result'] . " AS ITV 
+                    /(SELECT COUNT(*) FROM " . $this->DB_TABLES['ceabs-result'] . " AS ITV 
                     WHERE ITV.DataReferencia >= '" . FormatarDataSQL($data['filters']['DataReferenciaDe']) . "'
                     AND ITV.DataReferencia <= '" . FormatarDataSQL($data['filters']['DataReferenciaAte']) . "'
                     )*100" : "") . ",2) AS QtdTotalTabulacao
-                FROM " . $this->DB_TABLES['ceabs_result'] . "
+                FROM " . $this->DB_TABLES['ceabs-result'] . "
                 WHERE DataReferencia >= '" . FormatarDataSQL($data['filters']['DataReferenciaDe']) . "'
                 AND DataReferencia <= '" . FormatarDataSQL($data['filters']['DataReferenciaAte']) . "'
                 GROUP BY Finalizador
@@ -55,8 +55,8 @@ class Tabulations_Model extends MY_Model {
         $this->db->group_by('RES.DataReferencia');
         $this->db->order_by('RES.DataReferencia', 'ASC');
         $query = $this->db->select('CONVERT(VARCHAR(10),RES.DataReferencia,103) AS DataReferencia, SUM(FIN.QtdAgendamento) AS QtdAgendamento, SUM(FIN.QtdSucesso) AS QtdSucesso, COUNT(*) AS QtdTabulacao')
-                        ->join($this->DB_TABLES['ceabs_fin'] . ' AS FIN', 'FIN.IDFinalizador=RES.IDFinalizador', 'LEFT')
-                        ->get($this->DB_TABLES['ceabs_result'] . ' AS RES');
+                        ->join($this->DB_TABLES['ceabs-fin'] . ' AS FIN', 'FIN.IDFinalizador=RES.IDFinalizador', 'LEFT')
+                        ->get($this->DB_TABLES['ceabs-result'] . ' AS RES');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
@@ -69,8 +69,8 @@ class Tabulations_Model extends MY_Model {
         $this->db->group_by('DATEPART(HOUR,RES.DataHoraResultado)');
         $this->db->order_by('1', 'ASC');
         $query = $this->db->select('DATEPART(HOUR,RES.DataHoraResultado) AS Intervalo, SUM(FIN.QtdAgendamento) AS QtdAgendamento, SUM(FIN.QtdSucesso) AS QtdSucesso, SUM(FIN.QtdInsucesso) AS QtdInsucesso, COUNT(*) AS QtdTabulacao')
-                        ->join($this->DB_TABLES['ceabs_fin'] . ' AS FIN', 'FIN.IDFinalizador=RES.IDFinalizador', 'LEFT')
-                        ->get($this->DB_TABLES['ceabs_result'] . ' AS RES');
+                        ->join($this->DB_TABLES['ceabs-fin'] . ' AS FIN', 'FIN.IDFinalizador=RES.IDFinalizador', 'LEFT')
+                        ->get($this->DB_TABLES['ceabs-result'] . ' AS RES');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
@@ -82,8 +82,8 @@ class Tabulations_Model extends MY_Model {
         $this->db->where("RES.DataReferencia <=", FormatarDataSQL($data['DataReferenciaAte']));
         $this->db->order_by('RES.DataHoraResultado', 'DESC');
         $query = $this->db->select('DATEPART(HOUR,RES.DataHoraResultado) AS Intervalo, RES.*')
-                        ->join($this->DB_TABLES['ceabs_fin'] . ' AS FIN', 'FIN.IDFinalizador=RES.IDFinalizador', 'LEFT')
-                        ->get($this->DB_TABLES['ceabs_result'] . ' AS RES');
+                        ->join($this->DB_TABLES['ceabs-fin'] . ' AS FIN', 'FIN.IDFinalizador=RES.IDFinalizador', 'LEFT')
+                        ->get($this->DB_TABLES['ceabs-result'] . ' AS RES');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;

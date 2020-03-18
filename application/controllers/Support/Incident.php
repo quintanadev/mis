@@ -1,17 +1,17 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Ticket extends MY_Controller {
+class Incident extends MY_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->model('Ticket_Model', 'Ticket');
+        $this->load->model('Support/Incident_Model', 'Incident');
     }
 
     public function index() {
         $data['page_title'] = 'Help Desk';
         $data['page_subtitle'] = 'Chamados de atribuição do MIS';
-        $data['views'] = ['pages/ticket/index'];
+        $data['views'] = ['pages/support/incident/index'];
 
         $this->load->view('site/layout', $data);
     }
@@ -19,7 +19,7 @@ class Ticket extends MY_Controller {
     public function created() {
         $data['page_title'] = 'Help Desk';
         $data['page_subtitle'] = 'Chamados de atribuição do MIS';
-        $data['views'] = ['pages/ticket/created'];
+        $data['views'] = ['pages/support/incident/created'];
 
         $this->load->view('site/layout', $data);
     }
@@ -29,15 +29,15 @@ class Ticket extends MY_Controller {
 
         $data['page_title'] = "Detalhes do Chamado";
         $data['page_subtitle'] = 'Help Desk';
-        $data['views'] = ['pages/ticket/detail'];
-        $data['ticket'] = $this->Ticket->get_ticket_detail($id);
+        $data['views'] = ['pages/support/incident/detail'];
+        $data['incident'] = $this->Incident->get_incident_detail($id);
 
         $this->load->view('site/layout', $data);
     }
 
-    public function get_ticket() {
+    public function get_incident() {
         $post = $this->input->post();
-        $retorno = $this->Ticket->get_ticket($post);
+        $retorno = $this->Incident->get_incident($post);
 
         $regTotal = ($retorno ? count($retorno) : 0);
         $regMostrar = (intval($post['length']) < 0 ? $regTotal : intval($post['length']));
@@ -49,7 +49,8 @@ class Ticket extends MY_Controller {
         if ($retorno) :
             for ($i = $regInicio; $i < $regFim; $i++) :
                 $data['data'][] = [
-                    'IDTicket' => $retorno[$i]['IDTicket'],
+                    'IDTicket' => '#' . substr('000000' . $retorno[$i]['IDTicket'], -6, 6),
+                    'Operacao' => '<img src="' . base_url($retorno[$i]['Imagem']) . '" alt="' . $retorno[$i]['Operacao'] . '" title="' . $retorno[$i]['Operacao'] . '" class="rounded-circle avatar-xs" />',
                     'TipoSolicitacao' => $retorno[$i]['TipoSolicitacao'],
                     'UsuarioCadastro' => $retorno[$i]['UsuarioCadastro'],
                     'DataCadastro' => FormatarData($retorno[$i]['DataCadastro'], 'd/m/Y H:i:s'),
@@ -58,7 +59,7 @@ class Ticket extends MY_Controller {
                         ($retorno[$i]['Status'] === "Aguardando Tratativa" ? "warning" :
                         ($retorno[$i]['Status'] === "Respondido" ? "success" :
                         "secondary"))) . '">' . $retorno[$i]['Status'] . '</span>',
-                    'Acoes' => '<a href="' . base_url("ticket/detail/{$retorno[$i]['IDTicket']}") . '" class="btn btn-secondary btn-sm"><i class="mdi mdi-comment-search-outline"></i></a>'
+                    'Acoes' => '<a href="' . base_url("support/incident/detail/{$retorno[$i]['IDTicket']}") . '" class="btn btn-secondary btn-sm"><i class="mdi mdi-comment-search-outline"></i></a>'
                 ];
             endfor;
         else:
@@ -72,43 +73,43 @@ class Ticket extends MY_Controller {
         echo json_encode($data);
     }
 
-    public function getTipoSolicitacao() {
-        $retorno = $this->modTkt->getTipoSolicitacao();
+    public function get_type_solicitation() {
+        $retorno = $this->Incident->get_type_solicitation();
         echo json_encode($retorno);
     }
 
-    public function getSolicitacao() {
+    public function get_solicitation() {
         $post = $this->input->post();
-        $retorno = $this->modTkt->getSolicitacao($post);
+        $retorno = $this->Incident->get_solicitation($post);
         echo json_encode($retorno);
     }
 
     public function getOperacao() {
-        $retorno = $this->modTkt->getOperacao();
+        $retorno = $this->Incident->getOperacao();
         echo json_encode($retorno);
     }
 
     public function putTicket() {
         $post = $this->input->post();
-        $retorno = $this->modTkt->putTicket($post);
+        $retorno = $this->Incident->putTicket($post);
         echo json_encode($retorno);
     }
 
     public function updateTratativa() {
         $post = $this->input->post();
-        $retorno = $this->modTkt->updateTratativa($post);
+        $retorno = $this->Incident->updateTratativa($post);
         echo json_encode($retorno);
     }
 
     public function getTicketDetalhe() {
         $post = $this->input->post();
-        $retorno = $this->modTkt->getTicketDetalhe($post);
+        $retorno = $this->Incident->getTicketDetalhe($post);
         echo json_encode($retorno);
     }
 
     public function getTicketComentario() {
         $post = $this->input->post();
-        $retorno = $this->modTkt->getTicketComentario($post);
+        $retorno = $this->Incident->getTicketComentario($post);
         echo json_encode($retorno);
     }
 

@@ -275,7 +275,7 @@ class System_Model extends MY_Model {
      * @param [type] $data
      * @return void
      */
-    public function putSettingsUser($data) {
+    public function update_settings_user($data) {
         $error = 0;
         $success = 0;
         foreach ($data as $key => $value) :
@@ -304,7 +304,7 @@ class System_Model extends MY_Model {
         return ['type' => ($error > 0 ? 'danger' : 'success'), 'msg' => ($error > 0 ? "Oops! Erro ao atualizar {$error} configurações." : 'Configurações salvas com sucesso!')];
     }
 
-    public function setPassword($data) {
+    public function set_password($data) {
         $update = [
             'Senha' => md5($data['Senha']),
             'DataAlteracao' => date('Y-m-d H:i:s'),

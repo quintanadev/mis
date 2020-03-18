@@ -45,4 +45,36 @@ class PowerBI_Model extends MY_Model {
         return FALSE;
     }
 
+    public function get_dashboard($id) {
+        $query = $this->db->where('IDDashboard', $id)
+                    ->get('pbi_dashboard');
+        if($query->num_rows() > 0) :
+            $pbi = $query->row_array();
+            if (!$this->session->userdata('USUARIO')['Funcionario'] && !$pbi['VisualizacaoCliente']) :
+                return ['type' => 'danger', 'msg' => 'Sem Permissão!'];
+            endif;
+            $this->set_log_pbi($this->session->userdata('USU_ID'), $pbi['IDDashboard']);
+            return $pbi;
+        endif;
+        return ['type' => 'danger', 'msg' => 'Relatório não encontrado!'];
+    }
+
+    public function set_log_pbi($usu, $pbi) {
+        $data = [
+            'IDUsuario' => $usu,
+            'IDDashboard' => $pbi
+        ];
+        $query = $this->db->where($data)
+                        ->where('DataReferencia', date('Y-m-d'))
+                        ->get('pbi_log_dashboard');
+        if ($query->num_rows() > 0) :
+            $this->db->where($data)
+                    ->where(['DataReferencia' => date('Y-m-d')])
+                    ->update('pbi_log_dashboard', ['QtdAcessos' => $query->row_array()['QtdAcessos'] + 1]);
+        else:
+            $this->db->insert('pbi_log_dashboard', $data);
+        endif;
+        return TRUE;
+    }
+
 }
