@@ -4,7 +4,7 @@
 var IncidentIndex = function() {
 
     var initTable = function() {
-        $('#tickets-table').DataTable({
+        $('#incidents-table').DataTable({
             "language": {
                 "aria": {
                     "sortAscending": ": Ascendente",
@@ -41,13 +41,13 @@ var IncidentIndex = function() {
                 }
             },
             "columns": [
-                {title: 'ID', data: 'IDTicket', name: 'TKT.IDTicket', className: 'text-center', defaultContent: '-'},
-                {title: 'Operação', data: 'Operacao', name: 'OPE.Operacao', className: 'text-center', defaultContent: '-'},
-                {title: 'Usuario Abertura', data: 'UsuarioCadastro', name: 'USU.NomeUsuario', className: '', defaultContent: '-'},
-                {title: 'Tipo Solicitação', data: 'TipoSolicitacao', name: 'TSOL.TipoSolicitacao', className: '', defaultContent: '-'},
-                {title: 'Data Cadastro', data: 'DataCadastro', name: 'TKT.DataCadastro', className: 'text-center', defaultContent: '-'},
-                {title: 'Status', data: 'Status', name: 'STS.Status', className: '', defaultContent: '-'},
-                {title: 'Ações', data: 'Acoes', className: 'text-center', defaultContent: '-'}
+                {title: 'ID', data: 'id_incident', name: 'TKT.id_incident', className: 'text-center', defaultContent: '-'},
+                {title: 'Operação', data: 'operation', name: 'OPE.operation', className: 'text-center', defaultContent: '-'},
+                {title: 'Usuario Abertura', data: 'user_created', name: 'USU.user_name', className: '', defaultContent: '-'},
+                {title: 'Tipo Solicitação', data: 'request_type', name: 'TSOL.request_type', className: '', defaultContent: '-'},
+                {title: 'Data Cadastro', data: 'created_at', name: 'TKT.created_at', className: 'text-center', defaultContent: '-'},
+                {title: 'Status', data: 'status', name: 'STS.status', className: '', defaultContent: '-'},
+                {title: 'Ações', data: 'actions', className: 'text-center', defaultContent: '-'}
             ],
             "order": [
                 [5, "asc"],

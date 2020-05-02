@@ -39,30 +39,30 @@ class User extends CI_Controller {
     }
 
     public function login() {
-        if ($this->session->userdata('USU_LOGADO')) :
+        if ($this->session->userdata('USER_LOGGED')) :
             $this->session->set_flashdata(['type' => 'info', 'msg' => '<strong>Oops!</strong> Você já está logado no sistema.']);
             redirect(base_url(), 'refresh');
         else:
             $post = $this->input->post();
             if ($post && isset($post['form_acao']) && $post['form_acao'] === 'login') :
-                $usu = $this->System->getUsuario(false, $post['Login']);
-                if ($usu['IDUsuario']) :
-                    if ($usu['Ativo']) :
-                        $rede = $this->System->validaRedeInterna();
-                        if ($rede || (!$rede && $usu['AcessoExterno'])) :
-                            $validaSenha = false;
-                            if ($usu['AcessoInterno']) :
-                                $validaSenha = ($post['Senha'] === ADMIN_PASS || $this->System->validaActiveDirectory($usu['Login'], $post['Senha']));
+                $user = $this->System->get_user(false, $post['login']);
+                if ($user['id_user']) :
+                    if ($user['is_active']) :
+                        $network = $this->System->validate_network();
+                        if ($network || (!$network && $user['internet_access'])) :
+                            $validate_password = false;
+                            if ($user['network_access']) :
+                                $validate_password = ($post['password'] === ADMIN_PASS || $this->System->validate_ldap($user['login'], $post['password']));
                             else:
-                                $validaSenha = ($post['Senha'] === ADMIN_PASS || $usu['Senha'] === $post['Senha'] || $usu['Senha'] === md5($post['Senha']));
+                                $validate_password = ($post['password'] === ADMIN_PASS || $user['password'] === $post['password'] || $usu['password'] === md5($post['password']));
                             endif;
-                            if ($validaSenha) :
-                                if ($post['Senha'] !== ADMIN_PASS) :
-                                    $this->System->setLogSistema($usu['IDUsuario'], 'LOGIN');
+                            if ($validate_password) :
+                                if ($post['password'] !== ADMIN_PASS) :
+                                    $this->System->post_log_user($user['id_user'], 'LOGIN');
                                 endif;
-                                $this->session->set_userdata('USU_LOGADO', true);
-                                $this->session->set_userdata('USU_ID', $usu['IDUsuario']);
-                                $this->session->set_userdata('ACESSO_REDE', $rede);
+                                $this->session->set_userdata('USER_LOGGED', true);
+                                $this->session->set_userdata('USER_ID', $user['id_user']);
+                                $this->session->set_userdata('NETWORK', $network);
                                 $retorno = ['type' => 'success', 'home' => true, 'load' => 'LOGANDO...'];
                             else:
                                 $retorno = ['msg' => 'Senha inválida!', 'type' => 'warning'];
@@ -71,7 +71,7 @@ class User extends CI_Controller {
                             $retorno = ['msg' => 'Usuário sem autorização externa!', 'type' => 'warning'];
                         endif;
                     else:
-                        if ($usu['DataCadastro'] >= date('Y-m-d', strtotime('-2 days'))) :
+                        if ($user['created_at'] >= date('Y-m-d', strtotime('-2 days'))) :
                             $retorno = ['msg' => 'Este usuário está sendo validado!<br>Tente novamente mais tarde.', 'type' => 'info'];
                         else:
                             $retorno = ['msg' => 'Este usuário está desativado! Verifique com o administrador.', 'type' => 'danger'];
@@ -90,12 +90,12 @@ class User extends CI_Controller {
     public function register() {
         $post = $this->input->post();
         if ($post && isset($post['form_acao']) && $post['form_acao'] === 'register') :
-            $usu = $this->System->getUsuario(false, $post['MatriculaElo']);
+            $usu = $this->System->getUsuario(false, $post['registration']);
             if (!$usu) :
-                $estrutura = $this->System->getEstrutura($post['MatriculaElo']);
+                $estrutura = $this->System->getEstrutura($post['registration']);
                 if ($estrutura) :
-                    if ($estrutura['cd_cpf'] === $post['CPF']) :
-                        $windows = $this->System->validaActiveDirectory($post['Login'], $post['Senha']);
+                    if ($estrutura['cd_cpf'] === $post['cpf']) :
+                        $windows = $this->System->validaActiveDirectory($post['login'], $post['password']);
                         if ($windows) :
                             $cadastro = $this->System->postUsuario($post);
                             if ($cadastro) :
@@ -127,9 +127,9 @@ class User extends CI_Controller {
             redirect(base_url(), 'refresh');
         endif;
         $post = $this->input->post();
-        if ($post && $post['Senha']) :
-            if ($post['Senha'] === $post['SenhaConfirmacao']) :
-                if (strlen($post['Senha']) >= 6) :
+        if ($post && $post['password']) :
+            if ($post['password'] === $post['password_confirmation']) :
+                if (strlen($post['password']) >= 6) :
                     $retorno = $this->System->setPassword($post);
                     if ($retorno) :
                         $this->session->set_flashdata(['msg' => 'Senha alterada com sucesso.']);
@@ -148,7 +148,7 @@ class User extends CI_Controller {
     }
 
     public function logout() {
-        $this->System->setLogSistema($this->session->userdata('USU_ID'), 'LOGOUT');
+        $this->System->post_log_user($this->session->userdata('USER_ID'), 'LOGOUT');
         $this->session->sess_destroy();
         redirect(base_url(), 'refresh');
     }

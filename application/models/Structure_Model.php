@@ -9,27 +9,37 @@ class Structure_Model extends MY_Model {
     }
 
     public function get_current_structure($data) {
-        if (!$this->session->userdata("USUARIO")['ModEstrutura']) :
-            // $this->db->where("TKT.IDUsuarioCadastro", $this->session->userdata("USU_ID"));
-        endif;
-        if ($data['search']['value']) :
-            $this->db->group_start()
-                    ->like('PES.NomeColaborador', $data['search']['value'])
-                    ->or_where("'#'+CONVERT(VARCHAR(12),PES.IDEstrutura)", $data['search']['value'])
-                    ->group_end();
-        endif;
-        $query = $this->db->select('PES.*')
-                        ->order_by($data['columns'][$data['order'][0]['column']]['name'], $data['order'][0]['dir'])
-                        ->get($this->DB_TABLES['estrutura-pessoais'] . ' AS PES');
+        if (!$this->session->userdata("USER")['is_mod_structure']) {
+            $registration = $this->session->userdata('USER')['resgitration'];
+            $this->db
+                ->group_start()
+                    ->where('matricula_elo', $registration)
+                    ->or_where('matricula_elo_gestor_1', $registration)
+                    ->or_where('matricula_elo_gestor_2', $registration)
+                    ->or_where('matricula_elo_gestor_3', $registration)
+                    ->or_where('matricula_elo_diretor', $registration)
+                ->group_end();
+        }
+        if ($data['search']['value']) {
+            $this->db
+                ->group_start()
+                    ->like('nome', $data['search']['value'])
+                    ->or_where("'#'+CONVERT(VARCHAR(12),matricula_elo)", $data['search']['value'])
+                ->group_end();
+        }
+        $query = $this->db
+            ->select('id_estrutura,matricula_elo,nome,sexo')
+            ->order_by($data['columns'][$data['order'][0]['column']]['name'], $data['order'][0]['dir'])
+            ->get('MIS_ESTRUTURA.dbo.vw_estrutura_atual');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
         return FALSE;
     }
 
-    public function get_employee($id) {
-        $this->db->where('IDEstrutura', $id);
-        $query = $this->db->get($this->DB_TABLES['estrutura-atual']);
+    public function get_employee($data) {
+        $this->db->where('id_estrutura', $data['id']);
+        $query = $this->db->get('MIS_ESTRUTURA.dbo.vw_estrutura_atual');
         if ($query->num_rows() > 0) :
             return $query->row_array();
         endif;
@@ -37,24 +47,28 @@ class Structure_Model extends MY_Model {
     }
 
     function get_data_select($data) {
-        if ($data['coluna'] === 'Segmento') {
-            $this->db->where('IDCliente', $data['cliente']);
-            $this->db->join($this->DB_TABLES['estrutura-lista-operacao'] . ' AS O', 'O.IDSegmento=A.IDSegmento');
-        } elseif ($data['coluna'] === 'GestorImediato') {
-            $data['coluna'] = 'NomeColaborador';
+        $select = $data['select'];
+        parse_str($data['form'], $form);
 
-            $cod = $this->db->where('IDEstrutura', $data['id'])
-                            ->get($this->DB_TABLES['estrutura-atual'])
-                            ->row_array()['CodNivelHierarquico'];
+        if ($select === 'gestor') {
+            $query = $this->db
+                ->select('PES.id_estrutura AS value, PES.nome AS title')
+                ->join('MIS_ESTRUTURA.dbo.dados_corporativos AS COR', 'COR.id_estrutura=PES.id_estrutura')
+                ->join('MIS_ESTRUTURA.dbo.lista_funcao AS FUN', 'FUN.id_funcao=COR.id_funcao')
+                ->join('MIS_ESTRUTURA.dbo.lista_nivel_hierarquico AS NIV', 'NIV.id_nivel_hierarquico=FUN.id_nivel_hierarquico')
+                ->where('NIV.cod_nivel_hierarquico = (SELECT cod_nivel_hierarquico + 1 FROM MIS_ESTRUTURA.dbo.vw_estrutura_atual WHERE id_estrutura=' . $form['id_estrutura'] . ')')
+                ->get('MIS_ESTRUTURA.dbo.dados_pessoais AS PES');
+        } else {
+            if ($select === 'segmento') {
+                $this->db->where('id_cliente', $form['id_cliente']);
+            }
 
-            $this->db->select("A.IDEstrutura AS IDGestorImediato, A.NomeColaborador + ' - ' + CONVERT(VARCHAR(9),A.MatriculaElo) AS GestorImediato")
-                    ->join($this->DB_TABLES['estrutura-corporativos'] . ' AS C', 'C.IDEstrutura=A.IDEstrutura')
-                    ->join($this->DB_TABLES['estrutura-lista-funcao'] . ' AS F', 'F.IDFuncao=C.IDFuncao')
-                    ->join($this->DB_TABLES['estrutura-lista-nivel-hierarquico'] . ' AS H', 'H.IDNivelHierarquico=F.IDNivelHierarquico')
-                    ->where("H.CodNivelHierarquico>1");
+            $query = $this->db
+                ->select("id_{$select} AS value, {$select} AS title")
+                ->where('ativo', 1)
+                ->order_by($select)
+                ->get('MIS_ESTRUTURA.dbo.lista_' . $select);
         }
-        $query = $this->db->order_by($data['coluna'])
-                ->get($this->DB_TABLES[$data['tabela']] . ' AS A');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
@@ -63,74 +77,92 @@ class Structure_Model extends MY_Model {
 
     public function update_personal_data($data) {
         $update = [
-            'IDEstadoCivil' => $data['IDEstadoCivil'],
-            'IDGrauInstrucao' => $data['IDGrauInstrucao'],
-            'DataAlteracao' => date('Y-m-d H:i:s'),
-            'UsuarioAlteracao' => $this->session->userdata('USU_ID')
+            'id_estado_civil' => $data['id_estado_civil'],
+            'id_grau_instrucao' => $data['id_grau_instrucao'],
+            'nome_mae' => strtoupper($data['nome_mae']),
+            'nome_pai' => strtoupper($data['nome_pai']),
+            'atualizado_em' => date('Y-m-d H:i:s'),
+            'id_usuario_atualizacao' => $this->session->userdata('USER_ID')
         ];
-        $this->db->where('IDEstrutura', $data['IDEstrutura'])
-            ->update($this->DB_TABLES['estrutura-pessoais'], $update);
+        $this->db->where('id_estrutura', $data['id_estrutura'])
+            ->update('MIS_ESTRUTURA.dbo.dados_pessoais', $update);
         if ($this->db->affected_rows() > 0) {
             return ['msg' => 'success'];
         }
-        return ['msg' => 'error'];
+        return ['msg' => 'Erro ao atualizar dados. Tente novamente mais tarde!'];
     }
 
     public function update_corporate_data($data) {
         $update = [
-            'IDStatusGestor' => $data['IDStatusGestor'],
-            'HorarioEntrada' => $data['HorarioEntrada'],
-            'HorarioSaida' => $data['HorarioSaida'],
-            'DataAlteracao' => date('Y-m-d H:i:s'),
-            'UsuarioAlteracao' => $this->session->userdata('USU_ID')
+            'id_status_gestor' => $data['id_status_gestor'],
+            'horario_entrada' => $data['horario_entrada'],
+            'horario_saida' => $data['horario_saida'],
+            'atualizado_em' => date('Y-m-d H:i:s'),
+            'id_usuario_atualizacao' => $this->session->userdata('USER_ID')
         ];
-        $this->db->where('IDEstrutura', $data['IDEstrutura'])
-            ->update($this->DB_TABLES['estrutura-corporativos'], $update);
+        $this->db->where('id_estrutura', $data['id_estrutura'])
+            ->update('MIS_ESTRUTURA.dbo.dados_corporativos', $update);
         if ($this->db->affected_rows() > 0) {
             return ['msg' => 'success'];
+        } else {
+            $insert = $update;
+            $insert['id_estrutura'] = $data['id_estrutura'];
+            $this->db->insert('MIS_ESTRUTURA.dbo.dados_corporativos', $insert);
+            if ($this->db->affected_rows() > 0) {
+                return ['msg' => 'success'];
+            }
         }
-        return ['msg' => 'error'];
+        return ['msg' => 'Erro ao atualizar dados. Tente novamente mais tarde!'];
     }
 
     public function update_allocation_data($data) {
-        $operacao = $this->db->where(['IDCliente' => $data['IDCliente'], 'IDSegmento' => $data['IDSegmento']])
-                            ->get($this->DB_TABLES['estrutura-lista-operacao'])
-                            ->row_array()['IDOperacao'];
         $update = [
-            'IDGestorImediato' => $data['IDGestorImediato'],
-            'IDSetor' => $data['IDSetor'],
-            'IDSite' => $data['IDSite'],
-            'IDOperacao' => $operacao,
-            'DataAlteracao' => date('Y-m-d H:i:s'),
-            'UsuarioAlteracao' => $this->session->userdata('USU_ID')
+            'id_gestor' => $data['id_gestor'],
+            'id_setor' => $data['id_setor'],
+            'id_site' => $data['id_site'],
+            'id_segmento' => $data['id_segmento'],
+            'atualizado_em' => date('Y-m-d H:i:s'),
+            'id_usuario_atualizacao' => $this->session->userdata('USER_ID')
         ];
-        $this->db->where('IDEstrutura', $data['IDEstrutura'])
-            ->update($this->DB_TABLES['estrutura-corporativos'], $update);
+        $this->db->where('id_estrutura', $data['id_estrutura'])
+            ->update('MIS_ESTRUTURA.dbo.dados_alocacao', $update);
         if ($this->db->affected_rows() > 0) {
             return ['msg' => 'success'];
+        } else {
+            $insert = $update;
+            $insert['id_estrutura'] = $data['id_estrutura'];
+            $this->db->insert('MIS_ESTRUTURA.dbo.dados_alocacao', $insert);
+            if ($this->db->affected_rows() > 0) {
+                return ['msg' => 'success'];
+            }
         }
-        return ['msg' => 'error'];
+        return ['msg' => 'Erro ao atualizar dados. Tente novamente mais tarde!'];
     }
 
-    public function put_contact_data($data) {
+    public function update_contact_data($data) {
         $update = [
-            'TelefoneFixo01' => $data['TelefoneFixo01'],
-            'TelefoneFixo02' => $data['TelefoneFixo02'],
-            'TelefoneCelular01' => $data['TelefoneCelular01'],
-            'TelefoneCelular02' => $data['TelefoneCelular02'],
-            'TelefoneCorporativo' => $data['TelefoneCorporativo'],
-            'TelefoneComercial' => $data['TelefoneComercial'],
-            'TelefoneEmergencia' => $data['TelefoneEmergencia'],
-            'ContatoEmergencia' => $data['ContatoEmergencia'],
-            'EmailPessoal' => $data['EmailPessoal'],
-            'EmailCorporativo' => $data['EmailCorporativo'],
-            'DataAlteracao' => date('Y-m-d H:i:s'),
-            'UsuarioAlteracao' => $this->session->userdata('USU_ID')
+            'telefone_celular' => $data['telefone_celular'],
+            'telefone_fixo' => $data['telefone_fixo'],
+            'telefone_comercial' => $data['telefone_comercial'],
+            'telefone_corporativo' => $data['telefone_corporativo'],
+            'email_corporativo' => strtolower($data['email_corporativo']),
+            'email_pessoal' => strtolower($data['email_pessoal']),
+            'telefone_emergencia' => $data['telefone_emergencia'],
+            'contato_emergencia' => strtoupper($data['contato_emergencia']),
+            'atualizado_em' => date('Y-m-d H:i:s'),
+            'id_usuario_atualizacao' => $this->session->userdata('USER_ID')
         ];
-        $this->db->where('IDEstrutura', $data['IDEstrutura'])
-            ->update($this->DB_TABLES['estrutura-contatos'], $update);
+        $this->db->where('id_estrutura', $data['id_estrutura'])
+            ->update('MIS_ESTRUTURA.dbo.dados_contatos', $update);
         if ($this->db->affected_rows() > 0) {
             return ['msg' => 'success'];
+        } else {
+            $insert = $update;
+            $insert['id_estrutura'] = $data['id_estrutura'];
+            $this->db->insert('MIS_ESTRUTURA.dbo.dados_contatos', $insert);
+            if ($this->db->affected_rows() > 0) {
+                return ['msg' => 'success'];
+            }
         }
         return ['msg' => 'error'];
     }

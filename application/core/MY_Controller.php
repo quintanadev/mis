@@ -8,19 +8,20 @@ class MY_Controller extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->validateSession();
+        $this->validate_session();
     }
 
-    public function validateSession() {
-        $this->logged = $this->session->userdata('USU_LOGADO');
+    public function validate_session() {
+        $this->logged = $this->session->userdata('USER_LOGGED');
         if ($this->logged) :
             $this->load->model('System_Model', 'System');
-            $this->System->setSessionUsuario();
-            if ($this->session->userdata('USUARIO')['ResetSenha']) :
+            $route = $this->System->get_route();
+            $this->System->post_user_session();
+            if ($this->session->userdata('USUARIO')['reset_password']) :
                 $this->session->set_flashdata(['msg' => 'Favor alterar sua senha.']);
                 redirect(base_url('user/change-password'), 'refresh');
             endif;
-            if (!$this->session->userdata('USUARIO')['Admin'] && strstr($this->session->userdata('MENU_ATUAL')['MenuURL'], 'admin')) :
+            if (!$this->session->userdata('USER')['is_admin'] && $this->session->userdata('MENU_CURRENT')['admin_access']) :
                 redirect('access-denied', 'refresh');
             endif;
             return TRUE;

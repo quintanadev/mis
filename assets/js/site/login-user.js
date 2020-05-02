@@ -78,18 +78,18 @@ var LoginUser = function() {
 
             form.validate({
                 rules: {
-                    Login: {
+                    login: {
                         required: true
                     },
-                    Senha: {
+                    password: {
                         required: true
                     }
                 },
                 messages: {
-                    Login: {
+                    login: {
                         required: "Informe seu usuário."
                     },
-                    Senha: {
+                    password: {
                         required: "Informe sua senha."
                     }
                 }
@@ -128,50 +128,50 @@ var LoginUser = function() {
 
             form.validate({
                 rules: {
-                    NomeUsuario: {
+                    user_name: {
 	                    required: true
 	                },
-	                Email: {
+	                email: {
 	                    required: true,
 	                    email: true
 	                },
-	                MatriculaElo: {
+	                registration: {
 						required: true,
 						maxlength: 9
 	                },
-	                CPF: {
+	                cpf: {
 						required: true,
 						maxlength: 11,
                     	minlength: 11
 	                },
-	                Login: {
+	                login: {
 	                    required: true
 					},
-					Senha: {
+					password: {
 	                    required: true
 	                }
                 },
                 messages: {
-	                NomeUsuario: {
+	                user_name: {
 	                    required: 'Informe seu nome completo.'
 	                },
-	                Email: {
+	                email: {
 	                    required: 'Informe seu email.',
 	                    email: 'Informe um email válido.'
 	                },
-	                MatriculaElo: {
+	                registration: {
 						required: 'Informe sua matrícula Elo.',
 						maxlength: 'Informe uma Matrícula Elo válida.'
 	                },
-	                CPF: {
+	                cpf: {
 						required: 'Informe seu CPF.',
 						maxlength: 'Informe um CPF válido.',
                     	minlength: 'Informe um CPF válido.'
 	                },
-	                Login: {
+	                login: {
 	                    required: 'Informe seu login de acesso à rede.'
 					},
-					Senha: {
+					password: {
 	                    required: 'Informe sua senha.'
 	                },
 	            }

@@ -72,15 +72,14 @@
     </div>
 </div>
 
-
 <div class="row">
     <div class="col-12">
         <div class="card-box">
             <a href="<?= base_url('support/incident/created'); ?>" class="btn btn-sm btn-blue waves-effect waves-light float-right">
-                <i class="mdi mdi-plus-circle"></i> Abrir Novo Ticket
+                <i class="mdi mdi-plus-circle"></i> Abrir Novo Incidente
             </a>
             <h4 class="header-title mb-4">Lista de Chamados</h4>
-            <table class="table table-hover m-0 table-centered dt-responsive nowrap w-100" id="tickets-table"></table>
+            <table class="table table-hover m-0 table-centered dt-responsive nowrap w-100" id="incidents-table"></table>
         </div>
     </div>
 </div>

@@ -10,21 +10,30 @@
         <!-- App favicon -->
         <link rel="shortcut icon" href="<?= base_url('assets/media/logos/favicon.ico'); ?>">
 
+        <!--begin::Global Theme Styles(used by all pages) -->
+		<link href="<?= base_url('assets/css/plugins.bundle.css'); ?>" rel="stylesheet" type="text/css" />
+        <!--end::Global Theme Styles -->
+
+        <!-- Plugins css -->
+        <link href="<?= base_url('assets/plugins/datatables/DataTables-1.10.12/css/dataTables.bootstrap4.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/datatables/Responsive-2.2.3/css/responsive.bootstrap4.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/ladda/ladda-themeless.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/sweetalert2/sweetalert2.min.css'); ?>" rel="stylesheet" type="text/css" />
+
+        <!-- Page css -->
+        <link href="<?= base_url('assets/plugins/flatpickr/flatpickr.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/bootstrap-select/bootstrap-select.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/select2/select2.min.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/quill/quill.core.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/quill/quill.bubble.css'); ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/plugins/quill/quill.snow.css'); ?>" rel="stylesheet" type="text/css" />
+        
         <!-- App css -->
         <?php $skin = (isset($this->session->userdata('CONFIG_U')['site-skin']) ? $this->session->userdata('CONFIG_U')['site-skin'] : $this->session->userdata('CONFIG_G')['site-skin']); ?>
         <link href="<?= base_url('assets/css/ubold/bootstrap-' . $skin . '.min.css'); ?>" rel="stylesheet" type="text/css" />
         <link href="<?= base_url('assets/css/ubold/icons-' . $skin . '.min.css'); ?>" rel="stylesheet" type="text/css" />
         <link href="<?= base_url('assets/css/ubold/app-' . $skin . '.css'); ?>" rel="stylesheet" type="text/css" />
 
-        <!--begin::Global Theme Styles(used by all pages) -->
-		<link href="<?= base_url('assets/css/plugins.bundle.css'); ?>" rel="stylesheet" type="text/css" />
-        <!--end::Global Theme Styles -->
-
-        <!-- Plugins css -->
-        <link href="<?= base_url('assets/plugins/flatpickr/flatpickr.min.css'); ?>" rel="stylesheet" type="text/css" />
-        <link href="<?= base_url('assets/plugins/datatables/DataTables-1.10.12/css/dataTables.bootstrap4.css'); ?>" rel="stylesheet" type="text/css" />
-        <link href="<?= base_url('assets/plugins/datatables/Responsive-2.2.3/css/responsive.bootstrap4.css'); ?>" rel="stylesheet" type="text/css" />
-        
     </head>
 
     <body>

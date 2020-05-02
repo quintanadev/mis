@@ -8,7 +8,7 @@ class System_Model extends MY_Model {
         parent::__construct();
     }
 
-    public function validaRedeInterna() {
+    public function validate_network() {
         $int = explode('.', (isset($_SERVER['LOCAL_ADDR']) ? $_SERVER['LOCAL_ADDR'] : $_SERVER['SERVER_ADDR']));
         $ext = explode('.', $_SERVER['REMOTE_ADDR']);
         if ($int[0] === $ext[0] || $int[1] === $ext[1]) :
@@ -17,18 +17,18 @@ class System_Model extends MY_Model {
         return FALSE;
     }
 
-    public function validaActiveDirectory($usuario, $senha) {
+    public function validate_ldap($user, $password) {
         $domain = "GRUPOELO.INT";
-        $usuario .= "@{$domain}";
+        $user .= "@{$domain}";
         $base_dn = 'DC=GRUPOELO,DC=INT';
-        $filter = "(&(objectClass=user)(samaccountname={$usuario}))";
+        $filter = "(&(objectClass=user)(samaccountname={$user}))";
         $connect = ldap_connect($domain);
         if ($connect) :
             // We have to set this option for the version of Active Directory we are using.
             ldap_set_option($connect, LDAP_OPT_PROTOCOL_VERSION, 3) or die('Unable to set LDAP protocol version');
             ldap_set_option($connect, LDAP_OPT_REFERRALS, 0); // We need this for doing an LDAP search.
             
-            @$bind = ldap_bind($connect, $usuario, $senha);
+            @$bind = ldap_bind($connect, $user, $password);
             if ($bind) :
                 ldap_control_paged_result($connect, 1);
                 $search = ldap_search($connect, $base_dn, $filter, ['userprincipalname', 'displayname', 'samaccountname', 'cn', 'memberof']);
@@ -42,21 +42,21 @@ class System_Model extends MY_Model {
         endif;
     }
 
-    public function getUsuario($usu, $login = FALSE) {
-        if ($usu) :
-            $query = $this->db->where('IDUsuario', $usu)
-                            ->get('admin_usuarios');
+    public function get_user($user, $login = FALSE) {
+        if ($user) :
+            $query = $this->db->where('id_user', $user)
+                            ->get('admin_users');
             if ($query->num_rows() > 0) :
                 return $query->row_array();
             endif;
         else:
-            $query = $this->db->where('MatriculaElo', (is_numeric(substr($login, 1)) ? intval($login) : $login))
-                            ->get('admin_usuarios');
+            $query = $this->db->where('registration', (is_numeric(substr($login, 1)) ? intval($login) : $login))
+                            ->get('admin_users');
             if ($query->num_rows() > 0) :
                 return $query->row_array();
             else:
-                $query = $this->db->where('Login', $login)
-                            ->get('admin_usuarios');
+                $query = $this->db->where('login', $login)
+                            ->get('admin_users');
                 if ($query->num_rows() > 0) :
                     return $query->row_array();
                 endif;
@@ -65,160 +65,160 @@ class System_Model extends MY_Model {
         return FALSE;
     }
 
-    public function postUsuario($data) {
+    public function post_user($data) {
         $insert = [
-            'MatriculaElo' => $data['MatriculaElo'],
-            'Login' => strtolower($data['Login']),
-            'Senha' => md5($data['Senha']),
-            'NomeUsuario' => strtoupper($data['NomeUsuario']),
-            'Email' => strtolower($data['Email'])
+            'registration' => $data['registration'],
+            'login' => strtolower($data['login']),
+            'password' => md5($data['password']),
+            'user_name' => strtoupper($data['user_name']),
+            'email' => strtolower($data['email'])
         ];
-        $this->db->insert('admin_usuarios', $insert);
+        $this->db->insert('admin_users', $insert);
         if ($this->db->affected_rows() > 0) :
             return TRUE;
         endif;
         return FALSE;
     }
 
-    public function getEstrutura($matricula) {
-        $query = $this->db->where('MatriculaElo', $matricula)
-                        ->get($this->DB_TABLES['estrutura-atual']);
+    public function get_structure($registration) {
+        $query = $this->db->where('matricula_elo', $registration)
+                        ->get('MIS_ESTRUTURA.dbo.vw_estrutura_atual');
         if ($query->num_rows() > 0) :
             return $query->row_array();
         endif;
         return FALSE;
     }
 
-    public function getOperacoesUsuario($matricula) {
+    public function get_user_operations($registration) {
         $query = $this->db->distinct()
-                        ->select('Cliente AS operacao')
+                        ->select('cliente AS operation')
                         ->group_start()
-                            ->where('MatriculaElo', $matricula)
-                            ->or_where('IDGestorImediato', $matricula)
-                            ->or_where('IDGestor2', $matricula)
-                            ->or_where('IDGestor3', $matricula)
-                            ->or_where('IDDiretor', $matricula)
+                            ->where('matricula_elo', $registration)
+                            ->or_where('matricula_elo_gestor_1', $registration)
+                            ->or_where('matricula_elo_gestor_2', $registration)
+                            ->or_where('matricula_elo_gestor_3', $registration)
+                            ->or_where('matricula_elo_diretor', $registration)
                         ->group_end()
-                        ->where('Cliente IS NOT NULL')
-                        ->get($this->DB_TABLES['estrutura-atual']);
+                        ->where('cliente IS NOT NULL')
+                        ->get('MIS_ESTRUTURA.dbo.vw_estrutura_atual');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
         return FALSE;
     }
 
-    public function getOperacoesPermissoes($usuario) {
+    public function get_permission_operations($user) {
         $query = $this->db->distinct()
-                        ->select('OPER.Alias AS operacao')
-                        ->join('admin_operacoes' . ' AS OPER', 'OPER.IDOperacao=PUO.IDOperacao')
-                        ->where('PUO.IDUsuario', $usuario)
-                        ->get('admin_per_usuarios_operacoes' . ' AS PUO');
+                        ->select('OPER.tags AS operation')
+                        ->join('admin_operations' . ' AS OPER', 'OPER.id_operation=PUO.id_operation')
+                        ->where('PUO.id_user', $user)
+                        ->get('permission_user_operation' . ' AS PUO');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
         return FALSE;
     }
 
-    public function setLogSistema($usu, $evn) {
+    public function post_log_user($users, $event) {
         $insert = [
-            'IDUsuario' => $usu,
-            'Evento' => $evn,
-            'IDSession' => session_id(),
-            'Navegador' => $this->input->user_agent(),
-            'IPOrigem' => $_SERVER['REMOTE_ADDR']
+            'id_user' => $users,
+            'log_type' => $event,
+            'id_session' => session_id(),
+            'browser' => $this->input->user_agent(),
+            'ip_address' => $_SERVER['REMOTE_ADDR']
         ];
-        $this->db->insert('admin_log_sistema', $insert);
+        $this->db->insert('admin_log_system', $insert);
         return TRUE;
     }
 
-    public function setSessionUsuario() {
+    public function post_user_session() {
         /**
          * Define configurações GLOBAIS da aplicação
          */
-        $queryGlobal = $this->db->get('admin_configuracoes_globais')->result_array();
+        $queryGlobal = $this->db->get('admin_global_config')->result_array();
         $configGlobal = [];
         foreach ($queryGlobal as $key => $value) {
-            $configGlobal[$value['ConfigAlias']] = $value['ConfigValor'];
+            $configGlobal[$value['config_tag']] = $value['config_value'];
         }
 
         /**
          * Define dados do USUARIO
          */
-        $usuario = $this->getUsuario($this->session->userdata('USU_ID'));
+        $user = $this->get_user($this->session->userdata('USER_ID'));
 
         /**
          * Define Configurações do USUÁRIO
          */
-        $queryUser = $this->db->where('IDUsuario', $this->session->userdata('USU_ID'))
-                            ->get('admin_configuracoes_usuarios')
+        $queryUser = $this->db->where('id_user', $this->session->userdata('USU_ID'))
+                            ->get('admin_user_config')
                             ->result_array();
         $configUser = [];
         foreach ($queryUser as $key => $value) :
-            $configUser[$value['ConfigAlias']] = $value['ConfigValor'];
+            $configUser[$value['config_tag']] = $value['config_value'];
         endforeach;
 
         /**
          * Define MENU da aplicação
          */
-        if (!$usuario['Funcionario']) {
-            $this->db->where(['AcessoCliente' => 1]);
+        if (!$user['is_employee']) {
+            $this->db->where(['client_access' => 1]);
         }
-        if (!$usuario['Admin']) {
-            $this->db->where(['AcessoAdmin' => 0]);
+        if (!$user['is_admin']) {
+            $this->db->where(['admin_access' => 0]);
         }
-        $menuP = $this->db->where(['MenuAPP' => 'portal', 'Ativo' => 1])
-                            ->order_by('MenuTipo ASC,Ordem ASC')
+        $menuP = $this->db->where(['app' => 'portal', 'is_active' => 1])
+                            ->order_by('level ASC,order ASC')
                             ->get('admin_menus')
                             ->result_array();
         $menuPortal = [];
         foreach ($menuP as $key => $value) {
-            if ($value['MenuTipo'] === 0) {
-                $menuPortal[$value['IDMenu']] = $value;
-            } elseif ($value['MenuTipo'] === 1) {
-                $menuPortal[$value['IDMenuTitulo']]['Menu'][$value['IDMenu']] = $value;
-            } elseif ($value['MenuTipo'] === 2) {
-                $menuPortal[$value['IDMenuTitulo']]['Menu'][$value['IDMenuGrupo']]['MenuGrupo'][$value['IDMenu']] = $value;
-            } elseif ($value['MenuTipo'] === 3) {
-                $menuPortal[$value['IDMenuTitulo']]['Menu'][$value['IDMenuGrupo']]['MenuGrupo'][$value['IDSubMenuGrupo']]['SubMenuGrupo'][$value['IDMenu']] = $value;
+            if ($value['level'] === 0) {
+                $menuPortal[$value['id_menu']] = $value;
+            } elseif ($value['level'] === 1) {
+                $menuPortal[$value['id_title']]['menu'][$value['id_menu']] = $value;
+            } elseif ($value['level'] === 2) {
+                $menuPortal[$value['id_title']]['menu'][$value['id_group']]['menu_group'][$value['id_menu']] = $value;
+            } elseif ($value['level'] === 3) {
+                $menuPortal[$value['id_title']]['menu'][$value['id_group']]['menu_group'][$value['id_subgroup']]['menu_subgroup'][$value['id_menu']] = $value;
             }
         }
         
         /**
          * Define dados do MENU ATUAL da aplicação
          */
-        $menuAtual = $this->db->where(['MenuAPP' => 'portal', 'MenuURL' => $this->uri->uri_string()])
+        $menuCurrent = $this->db->where(['app' => 'portal', 'url' => $this->uri->uri_string()])
                             ->get('admin_menus')
                             ->row_array();
-        if ($menuAtual['IDMenu'] > 1) :
-            $this->setLogMenu($this->session->userdata('USU_ID'), $menuAtual['IDMenu']);
+        if ($menuCurrent['id_menu'] > 1) :
+            $this->post_log_menu($this->session->userdata('USER_ID'), $menuCurrent['id_menu']);
         endif;
 
         /**
          * Define SCRIPTS a serem carregados
          */
-        $scripts = $this->db->select('SCR.Script')
-                ->where(['AMS.IDMenu' => $menuAtual['IDMenu']])
-                ->join('admin_scripts AS SCR', 'SCR.IDScript=AMS.IDScript')
-                ->get('admin_menus_scripts AS AMS')
+        $scripts = $this->db->select('script')
+                ->where(['route' => uri_string()])
+                ->order_by('order', 'ASC')
+                ->get('admin_routes_scripts')
                 ->result_array();
 
         /**
          * Define dados de ESTRUTURA
          */
-        $estrutura = $this->getEstrutura($usuario['MatriculaElo']);
+        $structure = $this->get_structure($user['registration']);
 
         /**
          * Define OPERAÇÕES de acesso
          */
-        $op = $this->getOperacoesPermissoes($this->session->userdata('USU_ID'));
+        $op = $this->get_permission_operations($this->session->userdata('USER_ID'));
         if (!$op) :
-            $op = $this->getOperacoesUsuario($usuario['MatriculaElo']);
+            $op = $this->get_user_operations($user['registration']);
         endif;
 
-        $operacoes = [];
+        $operations = [];
         if ($op) :
             foreach ($op as $value) :
-                array_push($operacoes, $value['operacao']);
+                array_push($operations, $value['operation']);
             endforeach;
         endif;
         
@@ -229,40 +229,42 @@ class System_Model extends MY_Model {
             'CONFIG_G' => $configGlobal,
             'CONFIG_U' => $configUser,
             'MENU_PORTAL' => $menuPortal,
-            'MENU_ATUAL' => $menuAtual,
+            'MENU_CURRENT' => $menuCurrent,
             'MENU_SCRIPTS' => $scripts,
-            'ESTRUTURA' => $estrutura,
-            'USUARIO' => $usuario,
-            'USU_NOME' => explode(' ', $usuario['NomeUsuario'])[0],
-            'USU_SOBRENOME' => array_reverse(explode(' ', $usuario['NomeUsuario']))[0],
-            'USU_OPERS' => explode(',', implode(',', $operacoes))
+            'STRUCTURE' => $structure,
+            'USER' => $user,
+            'USER_NAME' => explode(' ', $user['user_name'])[0],
+            'USER_OPERATIONS' => explode(',', implode(',', $operations))
         ]);
 
         return TRUE;
     }
 
-    public function setLogMenu($usu, $menu) {
+    public function post_log_menu($user, $menu) {
         $data = [
-            'IDUsuario' => $usu,
-            'IDMenu' => $menu
+            'id_user' => $user,
+            'id_menu' => $menu
         ];
         $query = $this->db->where($data)
-                        ->where('DataReferencia', date('Y-m-d'))
+                        ->where('reference_date', date('Y-m-d'))
                         ->get('admin_log_menu');
         if ($query->num_rows() > 0) :
             $this->db->where($data)
-                    ->where(['DataReferencia' => date('Y-m-d')])
-                    ->update('admin_log_menu', ['QtdAcessos' => $query->row_array()['QtdAcessos'] + 1]);
+                    ->where(['reference_date' => date('Y-m-d')])
+                    ->update('admin_log_menu', [
+                        'count_access' => $query->row_array()['count_access'] + 1,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
         else:
             $this->db->insert('admin_log_menu', $data);
         endif;
         return TRUE;
     }
 
-    public function getLogSistema($data = NULL) {
-        $query = $this->db->where('DataCadastro>=' , date('Y-m-d', strtotime("{$data['dias']} days")))
-                ->where('Evento', 'LOGIN')
-                ->get('admin_log_sistema');
+    public function count_log_system($data = NULL) {
+        $query = $this->db->where('created_at>=' , date('Y-m-d', strtotime("{$data['dias']} days")))
+                ->where('log_type', 'LOGIN')
+                ->get('admin_log_system');
         if ($query->num_rows() > 0) :
             return $query->result_array();
         endif;
@@ -279,18 +281,18 @@ class System_Model extends MY_Model {
         $error = 0;
         $success = 0;
         foreach ($data as $key => $value) :
-            $select = $this->db->where(['ConfigAlias' => $key, 'IDUsuario' => $this->session->userdata('USU_ID')])
-                            ->get('admin_configuracoes_usuarios');
+            $select = $this->db->where(['config_tag' => $key, 'id_user' => $this->session->userdata('USU_ID')])
+                            ->get('admin_user_config');
             if ($select->num_rows() > 0) :
-                $this->db->where(['ConfigAlias' => $key, 'IDUsuario' => $this->session->userdata('USU_ID')])
-                        ->update('admin_configuracoes_usuarios', ['ConfigValor' => $value]);
+                $this->db->where(['config_tag' => $key, 'id_user' => $this->session->userdata('USU_ID')])
+                        ->update('admin_user_config', ['config_value' => $value]);
                 if ($this->db->affected_rows() > 0) :
                     $success++;
                 else:
                     $error++;
                 endif;
             else:
-                $this->db->insert('admin_configuracoes_usuarios', ['ConfigAlias' => $key, 'IDUsuario' => $this->session->userdata('USU_ID'), 'ConfigValor' => $value]);
+                $this->db->insert('admin_user_config', ['config_tag' => $key, 'id_user' => $this->session->userdata('USU_ID'), 'config_value' => $value]);
                 if ($this->db->affected_rows() > 0) :
                     $success++;
                 else:
@@ -304,18 +306,46 @@ class System_Model extends MY_Model {
         return ['type' => ($error > 0 ? 'danger' : 'success'), 'msg' => ($error > 0 ? "Oops! Erro ao atualizar {$error} configurações." : 'Configurações salvas com sucesso!')];
     }
 
-    public function set_password($data) {
+    public function update_password($data) {
         $update = [
-            'Senha' => md5($data['Senha']),
-            'DataAlteracao' => date('Y-m-d H:i:s'),
-            'ResetSenha' => 0
+            'password' => md5($data['Senha']),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'reset_password' => 0
         ];
-        $this->db->where('IDUsuario', $this->session->userdata('USU_ID'))
-                ->update('admin_usuarios', $update);
+        $this->db->where('id_user', $this->session->userdata('USU_ID'))
+                ->update('admin_users', $update);
         if ($this->db->affected_rows() > 0) :
             return TRUE;
         endif;
         return FALSE;
+    }
+
+    public function get_route() {
+        $route = uri_string();
+        $query = $this->db->where('route', $route)
+                ->get('admin_routes');
+        if (!$query->num_rows()) {
+            $this->db->insert('admin_routes', ['route' => $route]);
+            $query = $this->db->where('route', $route)
+                    ->get('admin_routes');
+            if ($query->num_rows() > 0) {
+                return $query->row_array();
+            }
+            return FALSE;
+        }
+        return $query->row_array();
+    }
+
+    public function get_birthdays() {
+        $query = $this->db
+            ->select('id_estrutura,nome')
+            ->where('CONVERT(VARCHAR(5),data_nascimento,103)', date('d/m'))
+            ->order_by('nome')
+            ->get('MIS_ESTRUTURA.dbo.vw_estrutura_atual');
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        }
+        return false;
     }
 
 }

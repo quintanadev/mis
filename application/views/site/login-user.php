@@ -53,10 +53,10 @@
 								</div>
 								<form class="kt-form" action="" method="POST">
 									<div class="input-group">
-										<input class="form-control" type="text" placeholder="Usuário" name="Login" autocomplete="off" value="<?= ($this->session->userdata('USUARIO')['Login'] ? $this->session->userdata('USUARIO')['Login'] : ''); ?>">
+										<input class="form-control" type="text" placeholder="Usuário" name="login" autocomplete="off" value="<?= ($this->session->userdata('USUARIO')['login'] ? $this->session->userdata('USUARIO')['login'] : ''); ?>">
 									</div>
 									<div class="input-group">
-										<input class="form-control" type="password" placeholder="Senha" name="Senha">
+										<input class="form-control" type="password" placeholder="Senha" name="password">
 									</div>
 									<div class="row kt-login__extra sr-only">
 										<div class="col kt-align-right">
@@ -76,22 +76,22 @@
 								</div>
 								<form class="kt-form" action="" method="POST">
 									<div class="input-group">
-										<input class="form-control" type="text" placeholder="Nome Completo" name="NomeUsuario" autocomplete="off">
+										<input class="form-control" type="text" placeholder="Nome Completo" name="user_name" autocomplete="off">
 									</div>
 									<div class="input-group">
-										<input class="form-control" type="text" placeholder="Email" name="Email" autocomplete="off">
+										<input class="form-control" type="text" placeholder="Email" name="email" autocomplete="off">
                                     </div>
                                     <div class="input-group">
-										<input class="form-control" type="text" placeholder="Matrícula" name="MatriculaElo" autocomplete="off">
+										<input class="form-control" type="text" placeholder="Matrícula" name="registration" autocomplete="off">
                                     </div>
                                     <div class="input-group">
-										<input class="form-control" type="text" placeholder="CPF" name="CPF" autocomplete="off">
+										<input class="form-control" type="text" placeholder="CPF" name="cpf" autocomplete="off">
                                     </div>
                                     <div class="input-group">
-										<input class="form-control" type="text" placeholder="Login de Rede" name="Login" autocomplete="off">
+										<input class="form-control" type="text" placeholder="Login de Rede" name="login" autocomplete="off">
 									</div>
 									<div class="input-group">
-										<input class="form-control" type="password" placeholder="Senha" name="Senha" autocomplete="off">
+										<input class="form-control" type="password" placeholder="Senha" name="password" autocomplete="off">
 									</div>
 									<div class="kt-login__actions">
 										<input type="hidden" name="form_acao" value="register">

@@ -24,5 +24,12 @@ class Home extends MY_Controller {
         $this->data['views'] = ['errors/access-denied'];
         $this->load->view('site/layout', $this->data);
     }
+
+    public function get_birthdays() {
+        $this->load->model('System_Model', 'System');
+        $post = $this->input->post();
+        $data = $this->System->get_birthdays($post);
+        echo json_encode($data);
+    }
 	
 }

@@ -7,7 +7,7 @@
             </div>
             <div class="col-md-6">
                 <div class="text-md-right footer-links d-none d-sm-block">
-                    <a href="http://grupoelo.com/">Sobre o Grupo Elo</a>
+                    <a href="http://grupoelo.com/" target="_blank">Sobre o Grupo Elo</a>
                     <a href="javascript:;">FAQ</a>
                     <a href="mailto:mis@elocontactcenter.com.br">Contate-nos</a>
                 </div>
